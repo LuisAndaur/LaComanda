@@ -1,0 +1,55 @@
+#TRABAJADORES
+	*bartender
+	*cerveceros
+	*cocineros
+	*mozos
+	*socios
+	
+
+#PEDIDOS
+	*codigo = PE001
+	*estado = * pendientes
+		  * en preparacion
+		  * listo para servir
+
+#MESAS
+	*codigo = ME001
+	*estado = * con cliente esperando pedido /mozo
+		  * con cliente comiendo /mozo
+		  * con cliente pagando /mozo
+		  * cerrada /socio
+
+PE001 + ME001 = tiempo espera
+
+
+#ENCUESTA /1 al 10
+	*mesa
+	*restaurante
+	*mozo
+	*cocinero
+
+Yo, como administrador del sistema, necesito ver:
+(Necesito ver en una fecha en particular o en un lapso de tiempo.)
+#empleados:
+a- Los días y horarios que se ingresaron al sistema.
+b- Cantidad de operaciones de todos por sector.
+c- Cantidad de operaciones de todos por sector, listada por cada empleado.
+d- Cantidad de operaciones de cada uno por separado.
+e- Posibilidad de dar de alta a nuevos, suspenderlos o borrarlos.
+
+#pedidos:
+a- Lo que más se vendió.
+b- Lo que menos se vendió.
+c- Los que no se entregaron en el tiempo estipulado.
+d- Los cancelados.
+
+#mesas:
+a- La más usada.
+b- La menos usada.
+c- La que más facturó.
+d- La que menos facturó.
+e- La/s que tuvo la factura con el mayor importe.
+f- La/s que tuvo la factura con el menor importe.
+g- Lo que facturó entre dos fechas dadas.
+h- Mejores comentarios.
+i- Peores comentarios.
