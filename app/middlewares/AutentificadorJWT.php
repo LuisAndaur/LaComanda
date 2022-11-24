@@ -1,6 +1,6 @@
 <?php
 
-
+require_once 'AuthJWT.php';
 use Psr7Middlewares\Middleware\Expires;
 use Slim\Psr7\Response;
 
@@ -16,7 +16,7 @@ use Slim\Psr7\Response;
                 if($peticionHeader != null)
                 {
                     $token = trim(explode("Bearer", $peticionHeader)[1]);
-                    JsonWebToken::VerificarToken($token);
+                    AuthJWT::VerificarToken($token);
                     $response = $handler->handle($request);
                 }
                 else
@@ -41,8 +41,116 @@ use Slim\Psr7\Response;
             try
             {
                 $token = trim(explode("Bearer", $peticionHeader)[1]);
-                $data = JsonWebToken::ObtenerData($token);
-                if($data[1] == 'socio')
+                $data = AuthJWT::ObtenerData($token);
+                if($data[1] == 'Socio')
+                {
+                    $response = $handler->handle($request);
+                }
+                else
+                {
+                    $response->getBody()->write(json_encode("No autorizado"));
+                    $response = $response->withStatus(401);
+                }
+            }
+            catch(Exception $e)
+            {
+                $response->getBody()->write(json_encode("Error token invalido"));
+                $response = $response->withStatus(401);
+            }
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
+        public static function verificarRolMozo($request, $handler)
+        {
+            $peticionHeader = $request->getHeaderLine("Authorization");
+            $response = new Response();
+            try
+            {
+                $token = trim(explode("Bearer", $peticionHeader)[1]);
+                $data = AuthJWT::ObtenerData($token);
+                if($data[1] == 'Socio' || $data[1] == 'Mozo')
+                {                      
+                    $response = $handler->handle($request);
+                }
+                else
+                {
+                    $response->getBody()->write(json_encode("No autorizado"));
+                    $response = $response->withStatus(401);
+                }
+
+            }
+            catch(Exception $e)
+            {
+                var_dump($e);
+                $response->getBody()->write(json_encode("Error token invalido"));
+                $response = $response->withStatus(401);
+            }
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
+
+        public static function verificarRolBartender($request, $handler)
+        {
+            $peticionHeader = $request->getHeaderLine("Authorization");
+            $response = new Response();
+            try
+            {
+                $token = trim(explode("Bearer", $peticionHeader)[1]);
+                $data = AuthJWT::ObtenerData($token);
+                if($data[1] == 'Socio' || $data[1] == 'Bartender')
+                {
+                    $response = $handler->handle($request);
+                }
+                else
+                {
+                    $response->getBody()->write(json_encode("No autorizado"));
+                    $response = $response->withStatus(401);
+                }
+
+            }
+            catch(Exception $e)
+            {
+                $response->getBody()->write(json_encode("Error token invalido"));
+                $response = $response->withStatus(401);
+            }
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
+        public static function verificarRolCervecero($request, $handler)
+        {
+            $peticionHeader = $request->getHeaderLine("Authorization");
+            $response = new Response();
+            try
+            {
+                $token = trim(explode("Bearer", $peticionHeader)[1]);
+                $data = AuthJWT::ObtenerData($token);
+                if($data[1] == 'Socio' || $data[1] == 'Cervecero')
+                {
+                    $response = $handler->handle($request);
+                }
+                else
+                {
+                    $response->getBody()->write(json_encode("No autorizado"));
+                    $response = $response->withStatus(401);
+                }
+            }
+            catch(Exception $e)
+            {
+                $response->getBody()->write(json_encode("Error token invalido"));
+                $response = $response->withStatus(401);
+            }
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
+        public static function verificarRolCocinero($request, $handler)
+        {
+            $peticionHeader = $request->getHeaderLine("Authorization");
+            $response = new Response();
+            try
+            {
+                $token = trim(explode("Bearer", $peticionHeader)[1]);
+                $data = AuthJWT::ObtenerData($token);
+                if($data[1] == 'Socio' || $data[1] == 'Cocinero')
                 {
                     $response = $handler->handle($request);
                 }

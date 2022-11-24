@@ -13,8 +13,8 @@
   require __DIR__ . '/../vendor/autoload.php';
   require_once './interfaces/IApiUsable.php';
   require_once './db/AccesoDatos.php';
-  require_once './models/JsonWebToken.php';
   require_once './middlewares/AutentificadorJWT.php';
+  require_once './middlewares/AuthJWT.php';
 
   require_once './models/Cliente.php';
   require_once './models/Mesa.php';
@@ -22,13 +22,14 @@
   require_once './models/Producto.php';
   require_once './models/Usuario.php';
 
-
-  require_once './controllers/ClienteController.php';
+  require_once './controllers/LoginController.php';
   require_once './controllers/MesaController.php';
-  require_once './controllers/PedidoController.php';
-  require_once './controllers/ProductoController.php';
   require_once './controllers/UsuarioController.php';
-
+  require_once './controllers/ProductoController.php';
+  require_once './controllers/PedidoController.php';
+  require_once './controllers/EstadisticasController.php';
+  require_once './controllers/EncuestaController.php';
+  require_once './controllers/HorariosController.php';
 
   // Load ENV
   $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -40,34 +41,70 @@
   // Add error middleware
   $app->addErrorMiddleware(true, true, true);
 
-  $app->group('/cliente', function(RouteCollectorProxy $group){
-    $group->post('[/]', \ClienteController::class . ':CargarUno');
-    $group->get('[/]', \ClienteController::class . ':TraerTodos');
-    $group->get('/{id}', \ClienteController::class . ':TraerUno');
-  });
-
-  $app->group('/usuario', function (RouteCollectorProxy $group) {
+  $app->post('/login', \LoginController::class . ':login');
+  
+  $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('[/]', \UsuarioController::class . ':TraerTodos');
-    $group->get('/{usuario}', \UsuarioController::class . ':TraerUno');
+    $group->get('/{id}', \UsuarioController::class . ':TraerUno');
     $group->post('[/]', \UsuarioController::class . ':CargarUno');
-  });
+    $group->put('/{id}', \UsuarioController::class . ':ModificarUno');
+    //$group->put('/modificar', \UsuarioController::class . ':ModificarUno');
+    $group->delete('/borrar', \UsuarioController::class . ':BorrarUno');
+  })->add(\AutentificadorJWT::class . ':verificarToken')->add(\AutentificadorJWT::class . ':verificarRolSocio');
 
-  $app->group('/mesa', function(RouteCollectorProxy $group){
+  $app->get('/horariosLogin', \HorariosController::class . ':TraerTodos')->add(\AutentificadorJWT::class . ':verificarToken')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+
+  $app->group('/mesas', function(RouteCollectorProxy $group){
     $group->get('[/]', \MesaController::class. ':TraerTodos');
-    $group->get('/{id}', \MesaController::class. ':TraerUno');
-    $group->post('[/]', \MesaController::class. ':CargarUno');
-  });
+    $group->get('/estadoMesas', \MesaController::class . ':MesaEstado')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->get('/{numero}', \MesaController::class. ':TraerUno');
+    $group->post('[/]', \MesaController::class. ':CargarUno')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->put('/actualizarMesa', \MesaController::class. ':ActualizarMesa')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->post('/actualizarEstado', \MesaController::class. ':ActualizarEstado')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->post('/obtenerCuenta', \MesaController::class . ':obtenerCuenta')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->post('/cerrarMesa', \MesaController::class. ':ActualizarEstado')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->delete('/borrar', \MesaController::class . ':BorrarUno')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+  })->add(\AutentificadorJWT::class . ':verificarToken');
 
   $app->group('/producto', function(RouteCollectorProxy $group){
     $group->get('[/]', \ProductoController::class. ':TraerTodos');
     $group->get('/{id}', \ProductoController::class. ':TraerUno');
-    $group->post('[/]', \ProductoController::class. ':CargarUno');
+    $group->post('[/]', \ProductoController::class. ':CargarUno')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->put('/modificar', \ProductoController::class . ':ModificarUno')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->delete('/borrar', \ProductoController::class . ':BorrarUno')->add(\AutentificadorJWT::class . ':verificarRolSocio');
   });
 
-  $app->group('/pedido', function(RouteCollectorProxy $group){
-    $group->get('[/]', \PedidoController::class. ':TraerTodos');
-    $group->get('/{pedido}', \PedidoController::class. ':TraerUno');
-    $group->post('[/]', \PedidoController::class. ':CargarUno');
+  $app->group('/pedidos', function(RouteCollectorProxy $group){
+    $group->get('[/]', \PedidoController::class. ':TraerTodos')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->get('/traerListos/{tipo}', \PedidoController::class . ':TraerListos')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->get('/pedidosDemora', \PedidoController::class . ':PedidosDemora')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->get('/traerPorPuesto/{tipo}', \PedidoController::class . ':TraerPorPuesto')->add(\AutentificadorJWT::class . ':verificarToken');
+    $group->get('/traerPendiente/{tipo}', \PedidoController::class . ':TraerPendiente')->add(\AutentificadorJWT::class . ':verificarToken');
+    $group->get('/traerEnPreparacion/{tipo}', \PedidoController::class . ':TraerEnPreparacion')->add(\AutentificadorJWT::class . ':verificarToken');
+    $group->get('/{codigo}', \PedidoController::class. ':TraerUno')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->post('[/]', \PedidoController::class. ':CargarUno')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->delete('/borrar', \PedidoController::class . ':BorrarUno')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->post('/actualizar', \PedidoController::class . ':ActualizarEstado')->add(\AutentificadorJWT::class . ':verificarToken');
+    $group->post('/actualizarMozo', \PedidoController::class . ':ActualizarEstadoMozo');
+    //$group->post('/cerrar/{numero_de_pedido}', \PedidoController::class . ':CerrarPedidoController')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->post('/foto', \PedidoController::class . ':SacarFoto')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+    $group->post('/demora', \PedidoController::class . ':VerDemora');
+    //$group->post('/agregar', \PedidoController::class . ':AgregarProducto')->add(\AutentificadorJWT::class . ':verificarRolMozo');
+  });
+
+  $app->group('/encuesta', function (RouteCollectorProxy $group)
+  {
+    $group->get('[/]', \EncuestaController::class . ':TraerTodos');
+    $group->get('/mejoresComentarios', \EncuestaController::class . ':MejoresComentarios')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->get('/{id}', \EncuestaController::class . ':TraerUno');
+    $group->post('/', \EncuestaController::class . ':CargarUno');
+  });
+
+  $app->group('/estadisticas', function (RouteCollectorProxy $group)
+  {
+    $group->get('/tarde', \LogController::class . ':TraerTarde')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->get('/temprano', \LogController::class . ':TraerATiempo')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->get('/{tipo}', \EstadisticasController::class . ':Estadisticas')->add(\AutentificadorJWT::class . ':verificarRolSocio');
   });
 
   $app->run();
