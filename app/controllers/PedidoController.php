@@ -22,7 +22,7 @@ class PedidoController extends Pedido implements IApiUsable
       $estado = "Pendiente";
       $puesto = "Mozo";
 
-      $cuentaMesa = Mesa::obtenerMesa($idMesa);
+      $auxMesa = Mesa::obtenerMesa($idMesa);
      
       $pd = new Pedido();
       $pd->codigo = $codigo;
@@ -106,8 +106,8 @@ class PedidoController extends Pedido implements IApiUsable
         $pd->datosProducto = $datosProducto;
         $t = Producto::obtenerProducto($datosProducto);
         $pd->total = $t->precio * $pd->cantidad;
-        $cuentaMesa->cuenta += $pd->total;
-        Mesa::cargarCuentaMesa($idMesa,$cuentaMesa->cuenta);
+        $auxMesa->cuenta = $auxMesa->cuenta + $pd->total;
+        Mesa::cargarCuentaMesa($idMesa,$auxMesa->cuenta);
       }
 
       $creacion = $pd->crearPedido();

@@ -39,7 +39,7 @@ class UsuarioController extends Usuario implements IApiUsable
     public function TraerUno($request, $response, $args)
     {
         // Buscamos usuario por id
-        $usr = $args['idUser'];
+        $usr = $args['id'];
         $usuario = Usuario::obtenerUsuario($usr);
         $payload = json_encode($usuario);
 
@@ -66,7 +66,7 @@ class UsuarioController extends Usuario implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $idUser = $parametros['idUser'];
+        $idUser = $parametros['id'];
         Usuario::modificarUsuario($idUser);
 
         LogController::CargarUno("usuarios",0,$idUser,"Modificar datos","Modificacion de un usuario");
@@ -82,7 +82,7 @@ class UsuarioController extends Usuario implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $usuarioId = $parametros['idUser'];
+        $usuarioId = $parametros['id'];
         Usuario::borrarUsuario($usuarioId);
 
         LogController::CargarUno("usuarios",0,0,"Borrar datos","Baja de un usuario");
@@ -94,29 +94,4 @@ class UsuarioController extends Usuario implements IApiUsable
           ->withHeader('Content-Type', 'application/json');
     }
 
-    // public function LogIn($request, $response, $args)
-    // {
-    //   $parametros = $request->getParsedBody();
-  
-    //   $usr= new Usuario();
-    //   $usr->idUser = $parametros['idUser'];
-    //   $usr->nombre = $parametros['nombre'];
-    //   $usr->puesto = $parametros['puesto'];
-    //   $usr->clave = $parametros['clave'];
-
-    //   if(Usuario::ValidarUsuario($usr))
-    //   {
-    //     $datos = array('idUser' => $usr->idUser,'nombre' => $usr->nombre, 'puesto' => $usr->puesto, 'clave' => $usr->clave);
-    //     $token = AuthJWT::CrearToken($datos);
-    //     $payload = json_encode(array('jwt' => $token));
-
-    //     LogController::CargarUno("usuarios",$usr->nombre,$usr->puesto,"Login","Login de un usuario");
-    //   }
-    //   else
-    //   {
-    //     $payload = json_encode(array('error' => 'El usuario no existe'));
-    //   }
-    //   $response->getBody()->write($payload);
-    //   return $response->withHeader('Content-Type', 'application/json');
-    // }
 }

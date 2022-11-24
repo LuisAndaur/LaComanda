@@ -16,7 +16,6 @@
   require_once './middlewares/AutentificadorJWT.php';
   require_once './middlewares/AuthJWT.php';
 
-  require_once './models/Cliente.php';
   require_once './models/Mesa.php';
   require_once './models/Pedido.php';
   require_once './models/Producto.php';
@@ -27,7 +26,6 @@
   require_once './controllers/UsuarioController.php';
   require_once './controllers/ProductoController.php';
   require_once './controllers/PedidoController.php';
-  require_once './controllers/EstadisticasController.php';
   require_once './controllers/EncuestaController.php';
   require_once './controllers/HorariosController.php';
 
@@ -42,14 +40,13 @@
   $app->addErrorMiddleware(true, true, true);
 
   $app->post('/login', \LoginController::class . ':login');
-  
+
   $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('[/]', \UsuarioController::class . ':TraerTodos');
     $group->get('/{id}', \UsuarioController::class . ':TraerUno');
     $group->post('[/]', \UsuarioController::class . ':CargarUno');
     $group->put('/{id}', \UsuarioController::class . ':ModificarUno');
-    //$group->put('/modificar', \UsuarioController::class . ':ModificarUno');
-    $group->delete('/borrar', \UsuarioController::class . ':BorrarUno');
+    $group->delete('/{id}', \UsuarioController::class . ':BorrarUno');
   })->add(\AutentificadorJWT::class . ':verificarToken')->add(\AutentificadorJWT::class . ':verificarRolSocio');
 
   $app->get('/horariosLogin', \HorariosController::class . ':TraerTodos')->add(\AutentificadorJWT::class . ':verificarToken')->add(\AutentificadorJWT::class . ':verificarRolSocio');
@@ -86,7 +83,6 @@
     $group->delete('/borrar', \PedidoController::class . ':BorrarUno')->add(\AutentificadorJWT::class . ':verificarRolSocio');
     $group->post('/actualizar', \PedidoController::class . ':ActualizarEstado')->add(\AutentificadorJWT::class . ':verificarToken');
     $group->post('/actualizarMozo', \PedidoController::class . ':ActualizarEstadoMozo');
-    //$group->post('/cerrar/{numero_de_pedido}', \PedidoController::class . ':CerrarPedidoController')->add(\AutentificadorJWT::class . ':verificarRolMozo');
     $group->post('/foto', \PedidoController::class . ':SacarFoto')->add(\AutentificadorJWT::class . ':verificarRolMozo');
     $group->post('/demora', \PedidoController::class . ':VerDemora');
     //$group->post('/agregar', \PedidoController::class . ':AgregarProducto')->add(\AutentificadorJWT::class . ':verificarRolMozo');
@@ -97,14 +93,7 @@
     $group->get('[/]', \EncuestaController::class . ':TraerTodos');
     $group->get('/mejoresComentarios', \EncuestaController::class . ':MejoresComentarios')->add(\AutentificadorJWT::class . ':verificarRolSocio');
     $group->get('/{id}', \EncuestaController::class . ':TraerUno');
-    $group->post('/', \EncuestaController::class . ':CargarUno');
-  });
-
-  $app->group('/estadisticas', function (RouteCollectorProxy $group)
-  {
-    $group->get('/tarde', \LogController::class . ':TraerTarde')->add(\AutentificadorJWT::class . ':verificarRolSocio');
-    $group->get('/temprano', \LogController::class . ':TraerATiempo')->add(\AutentificadorJWT::class . ':verificarRolSocio');
-    $group->get('/{tipo}', \EstadisticasController::class . ':Estadisticas')->add(\AutentificadorJWT::class . ':verificarRolSocio');
+    $group->post('[/]', \EncuestaController::class . ':CargarUno');
   });
 
   $app->run();

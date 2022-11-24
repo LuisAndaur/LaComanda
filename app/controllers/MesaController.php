@@ -169,14 +169,9 @@ class MesaController extends Mesa implements IApiUsable
         $id = $parametros['id'];
         $codigo = $parametros['codigo'];
   
-        $cuenta = Mesa::obtenerConsumosMesa($codigo);
+        $mesa = Mesa::obtenerMesa($id);
 
-        var_dump($cuenta);
-        die();
-
-        Mesa::cargarCuentaMesa($id,$cuenta[0][0]);
-
-        $payload = json_encode(array("mensaje" => "La cuenta de la mesa ".$id." es $".$cuenta[0][0]));
+        $payload = json_encode(array("mensaje" => "La cuenta de la MESA #".$id." #".$codigo. " => es $".$mesa->cuenta));
 
         LogController::CargarUno("mesas",$id,$codigo,"Obtener cuenta","Cuenta de una mesa");
 
