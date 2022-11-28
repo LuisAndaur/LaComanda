@@ -275,5 +275,7 @@ class Pedido{
             var_dump($foto["error"]);
         }
     }
+
+
 }
 ?>

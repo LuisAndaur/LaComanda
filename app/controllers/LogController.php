@@ -3,18 +3,16 @@ require_once './models/Log.php';
 
 class LogController extends Log
 {
-    public static function CargarUno($tipo, $idTipo, $nombreUsr, $accion, $descripcion)
+    public static function CargarUno($tipo, $identity, $nombreUsr, $accion, $descripcion)
     {
-      $fecha = date('Y-m-d');
      
       //Log
       $log = new Log();
       $log->tipo = $tipo;
-      $log->idTipo = $idTipo;
+      $log->identity = $identity;
       $log->nombreUsuario = $nombreUsr;
       $log->accion = $accion;
       $log->descripcion = $descripcion;
-      $log->fecha = $fecha;
 
       //Creacion
       $creacion = $log->crearLog();

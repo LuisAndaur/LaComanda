@@ -1,5 +1,6 @@
 <?php
 require_once './models/Horarios.php';
+require_once 'LogController.php';
 
     class LoginController
     {
@@ -34,6 +35,8 @@ require_once './models/Horarios.php';
                 $registro->nombre  = $usuario->nombre;
                 $registro->rol  = $usuario->puesto;
                 $registro->CrearHorarios();
+
+                LogController::CargarUno("login",$usuario->puesto,$usuario->nombre,"Ingreso","Ingreso al sistema");
 
                 $token = AuthJWT::CrearToken($data);
                 //$response->getBody()->write("Logueado: ");

@@ -2,6 +2,7 @@
 require_once './models/Mesa.php';
 require_once './interfaces/IApiUsable.php';
 require_once './controllers/LogController.php';
+require_once './controllers/FacturacionController.php';
 
 class MesaController extends Mesa implements IApiUsable
 {
@@ -23,7 +24,7 @@ class MesaController extends Mesa implements IApiUsable
           $mesa->nombre = $nombre;
           $mesa->crearMesa();
 
-          LogController::CargarUno("mesas",$mesa->numero,$mesa->nombre,"Cargar datos","Datos de una mesa");
+          LogController::CargarUno("mesas",$mesa->numero,$mesa->nombre,"Cargar una mesa","Datos de una mesa");
   
           $payload = json_encode(array("mensaje" => "Mesa creada con exito"));
           $mesa->Mostrar();
@@ -54,11 +55,12 @@ class MesaController extends Mesa implements IApiUsable
     public function TraerUno($request, $response, $args)
     {
         // Buscamos mesa por numero
-        $mesa = $args['numero'];
-        $unaMesa = Mesa::obtenerMesa($mesa);
+        $idMesa = $args['id'];
+
+        $unaMesa = Mesa::obtenerMesa($idMesa);
         $payload = json_encode($unaMesa);
 
-        LogController::CargarUno("mesas",$unaMesa->id,$mesa,"Obtener datos","Datos de una mesa");
+        LogController::CargarUno("mesas",$unaMesa->numero,$unaMesa->nombre,"Listar datos","Datos de una mesa");
 
         $response->getBody()->write($payload);
         return $response
@@ -70,7 +72,7 @@ class MesaController extends Mesa implements IApiUsable
         $lista = Mesa::obtenerTodos();
         $payload = json_encode(array("listaMesa" => $lista));
 
-        LogController::CargarUno("mesas",0,0,"Obtener datos","Datos de todas las mesas");
+        LogController::CargarUno("mesas",'Todos',count($lista),"Listar datos","Datos de todas las mesas");
 
         $response->getBody()->write($payload);
         return $response
@@ -79,12 +81,19 @@ class MesaController extends Mesa implements IApiUsable
     
     public function ModificarUno($request, $response, $args)
     {
-        $parametros = $request->getParsedBody();
+        $idMesa = $args['id'];
+        $parametros = $request->getParsedBody(); 
+        $nombre = $parametros['nombre'];
+        $estado = $parametros['estado'];
 
-        $numero = $parametros['numero'];
-        Mesa::modificarMesa($numero);
+        $mesa = Mesa::obtenerMesa($idMesa);
 
-        LogController::CargarUno("mesas",$numero,0,"Modificar datos","Modificacion de una mesa");
+        $mesa->nombre = $nombre;
+        $mesa->estadoMesa = $estado;
+
+        Mesa::modificarMesa($mesa);
+
+        LogController::CargarUno("mesas",$mesa->numero,$mesa->nombre,"Modificar datos","Modificacion de una mesa");
 
         $payload = json_encode(array("mensaje" => "Mesa modificada con exito"));
 
@@ -97,10 +106,11 @@ class MesaController extends Mesa implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $mesaId = $parametros['numero'];
+        $mesaId = $args['id'];
+        $mesa = Mesa::obtenerMesa($mesaId);
         Mesa::borrarMesa($mesaId);
 
-        LogController::CargarUno("mesas",$mesaId,0,"Obtener datos","Baja de una mesa");
+        LogController::CargarUno("mesas",$mesa->numero,$mesa->nombre,"Eliminar datos","Baja de una mesa");
 
         $payload = json_encode(array("mensaje" => "Mesa borrada con exito"));
 
@@ -125,7 +135,35 @@ class MesaController extends Mesa implements IApiUsable
           {
               $m->actualizarEstado($numero,$estadoMesa, $id);
               $payload = json_encode(array("mensaje" => "Mesa actualizada"));
-              LogController::CargarUno("mesas",$numero,$estadoMesa,"Actualizar datos","Actualizacion de una mesa");
+              LogController::CargarUno("mesas",$numero,$m->nombre,"Actualizar datos mesa",$estadoMesa);
+          }
+          else
+          {
+            $payload = json_encode(array("mensaje" => "No se pudo actualizar"));
+          }
+        }
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+      }
+
+      public static function CerrarMesa($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $id = $parametros['id'];
+        $numero = $parametros['numero'];
+        $estadoMesa = $parametros['estado'];
+        $e = new Mesa();
+        
+        $m = Mesa::obtenerMesa($id);
+        $e = Mesa::ValidarEstado($estadoMesa);
+        if($estadoMesa != NULL && $id != NULL)
+        { 
+          if($e > 0 && $e < 5)
+          {
+              $m->MesaCerrada($numero,$estadoMesa, $id, 0);
+              $payload = json_encode(array("mensaje" => "Mesa cerrada"));
+              LogController::CargarUno("mesas",$numero,$m->nombre,"Actualizar datos mesa",$estadoMesa);
           }
           else
           {
@@ -150,7 +188,7 @@ class MesaController extends Mesa implements IApiUsable
           if($e > 0 && $e < 5)
           {
               $m->estadoMesa = $estadoMesa;
-              $m->modificarMesa($idMesa);
+              $m->modificarMesaAccion($idMesa);
               echo 'Mesa actualizada';
               LogController::CargarUno("mesas",$idMesa,$estadoMesa,"Actualizar datos","Actualizacion de una mesa");
               return TRUE;
@@ -170,10 +208,12 @@ class MesaController extends Mesa implements IApiUsable
         $codigo = $parametros['codigo'];
   
         $mesa = Mesa::obtenerMesa($id);
+        
+        FacturacionController::CargarFactura($mesa->id, $mesa->numero,$mesa->cuenta);
 
         $payload = json_encode(array("mensaje" => "La cuenta de la MESA #".$id." #".$codigo. " => es $".$mesa->cuenta));
 
-        LogController::CargarUno("mesas",$id,$codigo,"Obtener cuenta","Cuenta de una mesa");
+        LogController::CargarUno("mesas",$codigo,$mesa->nombre,"Obtener cuenta","Cuenta de una mesa");
 
         $response->getBody()->write($payload);
         return $response

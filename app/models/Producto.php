@@ -34,10 +34,10 @@ class Producto{
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
     }
 
-    public static function obtenerProducto($nombre)
+    public static function obtenerProductoNombre($nombre)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT idProduc, nombre, precio, tipo, perfilEmpleado, idPuesto, puesto FROM productos WHERE nombre = :nombre");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM productos WHERE nombre = :nombre");
         $consulta->bindValue(':nombre', $nombre, PDO::PARAM_STR);
         $consulta->execute();
 
@@ -64,17 +64,17 @@ class Producto{
         return $consulta->fetchObject('Producto');
     }
 
-    public function modificarProducto($idProduc)
+    public function modificarProducto($producto)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE productos SET nombre = :nombre, precio = :precio, tipo = :tipo, perfilEmpleado = :perfilEmpleado,, idPuesto = :idPuesto, puesto = :puesto WHERE idProduc = :idProduc");
-        $consulta->bindValue(':idProduc', $idProduc, PDO::PARAM_INT);
-        $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
-        $consulta->bindValue(':precio', $this->precio, PDO::PARAM_STR);
-        $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
-        $consulta->bindValue(':perfilEmpleado', $this->perfilEmpleado, PDO::PARAM_STR);
-        $consulta->bindValue(':idPuesto', $this->idPuesto, PDO::PARAM_INT);
-        $consulta->bindValue(':puesto', $this->puesto, PDO::PARAM_STR);
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE productos SET nombre = :nombre, precio = :precio, tipo = :tipo, perfilEmpleado = :perfilEmpleado, idPuesto = :idPuesto, puesto = :puesto WHERE idProduc = :idProduc");
+        $consulta->bindValue(':idProduc', $producto->idProduc, PDO::PARAM_INT);
+        $consulta->bindValue(':nombre', $producto->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(':precio', $producto->precio, PDO::PARAM_STR);
+        $consulta->bindValue(':tipo', $producto->tipo, PDO::PARAM_STR);
+        $consulta->bindValue(':perfilEmpleado', $producto->perfilEmpleado, PDO::PARAM_STR);
+        $consulta->bindValue(':idPuesto', $producto->idPuesto, PDO::PARAM_INT);
+        $consulta->bindValue(':puesto', $producto->puesto, PDO::PARAM_STR);
         $consulta->execute();
     }
 
@@ -137,6 +137,16 @@ class Producto{
             default:
                 throw new Exception ("Tipo de producto invalido");
         }
+    }
+
+    public function toString()
+    {    
+        return $this->idProduc . ',   ' . $this->nombre . ',   ' . $this->precio . ',   ' . $this->tipo . ',   ' . $this->perfilEmpleado . ',   ' . $this->idPuesto  . ',   ' . $this->puesto;
+    }
+
+    public function GetCSV()
+    {
+        return $this->idProduc . ',' . $this->nombre . ',' . $this->precio . ',' . $this->tipo . ',' . $this->perfilEmpleado . ',' . $this->idPuesto  . ',' . $this->puesto;
     }
 }
 

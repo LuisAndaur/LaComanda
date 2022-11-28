@@ -25,9 +25,9 @@ class UsuarioController extends Usuario implements IApiUsable
 
         $usr->crearUsuario();
 
-        LogController::CargarUno("usuarios",$usr->nombre,$usr->puesto,"Cargar datos","Datos de un usuario");
+        LogController::CargarUno("usuarios",$usr->puesto,$usr->nombre,"Crear nuevo usuario","Datos de un usuario");
 
-        $payload = json_encode(array("mensaje" => "Usuario creado con eusrito"));
+        $payload = json_encode(array("mensaje" => "Usuario creado con éxito"));
 
         $usr->Mostrar();
 
@@ -43,7 +43,7 @@ class UsuarioController extends Usuario implements IApiUsable
         $usuario = Usuario::obtenerUsuario($usr);
         $payload = json_encode($usuario);
 
-        LogController::CargarUno("usuarios",$usuario->nombre,0,"Obtener datos","Datos de un usuario");
+        LogController::CargarUno("usuarios",$usuario->puesto,$usuario->nombre,"Listar un usuario","Datos de un usuario");
 
         $response->getBody()->write($payload);
         return $response
@@ -55,7 +55,7 @@ class UsuarioController extends Usuario implements IApiUsable
         $lista = Usuario::obtenerTodos();
         $payload = json_encode(array("listaUsuario" => $lista));
 
-        LogController::CargarUno("usuarios",0,0,"Obtener datos","Datos de todos los usuarios");
+        LogController::CargarUno("usuarios","Todos",count($lista),"Listar todos los usuarios","Datos de todos los usuarios");
 
         $response->getBody()->write($payload);
         return $response
@@ -64,14 +64,27 @@ class UsuarioController extends Usuario implements IApiUsable
     
     public function ModificarUno($request, $response, $args)
     {
+        $idUser = $args['id'];
+
         $parametros = $request->getParsedBody();
+        $nombre = $parametros['nombre'];
+        $clave = $parametros['clave'];
+        $puesto = $parametros['puesto'];
+        $estado = $parametros['estado'];
 
-        $idUser = $parametros['id'];
-        Usuario::modificarUsuario($idUser);
+        $usuario = Usuario::obtenerUsuario($idUser);
+        $usuario->nombre = $nombre;
+        $usuario->clave = $clave;
+        $usuario->puesto = $puesto;
+        $usuario->estado = $estado;
+        $usuario->idPuesto = Usuario::ValidarPuesto($usuario->puesto);
+        $usuario->idEstado = Usuario::ValidarEstado($usuario->estado);
+        
+        Usuario::modificarUsuario($usuario);
 
-        LogController::CargarUno("usuarios",0,$idUser,"Modificar datos","Modificacion de un usuario");
+        LogController::CargarUno("usuarios",$usuario->puesto,$usuario->nombre,"Modificar datos","Modificacion de un usuario");
 
-        $payload = json_encode(array("mensaje" => "Usuario modificado con eusrito"));
+        $payload = json_encode(array("mensaje" => "Usuario modificado con éxito"));
 
         $response->getBody()->write($payload);
         return $response
@@ -80,14 +93,13 @@ class UsuarioController extends Usuario implements IApiUsable
 
     public function BorrarUno($request, $response, $args)
     {
-        $parametros = $request->getParsedBody();
-
-        $usuarioId = $parametros['id'];
+        $usuarioId = $args['id'];
+        $usuario = Usuario::obtenerUsuario($usuarioId);
         Usuario::borrarUsuario($usuarioId);
 
-        LogController::CargarUno("usuarios",0,0,"Borrar datos","Baja de un usuario");
+        LogController::CargarUno("usuarios",$usuario->puesto,$usuario->nombre,"Borrar datos","Baja de un usuario");
 
-        $payload = json_encode(array("mensaje" => "Usuario borrado con eusrito"));
+        $payload = json_encode(array("mensaje" => "Usuario borrado con éxito"));
 
         $response->getBody()->write($payload);
         return $response

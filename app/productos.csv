@@ -1,0 +1,27 @@
+id,nombre,precio,tipo,perfilEmpleado,idPuesto,puesto
+1,Milanesa a caballo,320,Comida,8,3,Cocinero
+2,Fideos con salsa de tomate,640,Comida,8,3,Cocinero
+3,Hamburguesa completa,435,Comida,8,3,Cocinero
+4,Quilmes,120,Cerveza,10,2,Cervecero
+5,Patagonia,160,Cerveza,10,2,Cervecero
+6,Corona,140,Cerveza,10,2,Cervecero
+7,Andes,140,Cerveza,10,2,Cervecero
+8,Brahama,130,Cerveza,9,2,Cervecero
+9,Stella Artois,180,Cerveza,10,2,Cervecero
+10,Escalope de merluza,270,Comida,7,3,Cocinero
+11,Milanesa a la napolitana,310,Comida,7,3,Cocinero
+12,Pollo al disco,435,Comida,7,3,Cocinero
+13,Sorrentinos con crema,740,Comida,7,3,Cocinero
+14,Hamburguesa de garbanzos,290,Comida,8,3,Cocinero
+15,Ensalada cesar,235,Comida,7,3,Cocinero
+16,Papas fritas,192,Comida,7,3,Cocinero
+17,Rabas,210,Comida,7,3,Cocinero
+18,Revuelto de gramajo,298,Comida,8,3,Cocinero
+19,Daikiri,147,Trago,12,1,Bartender
+20,Margarita,134,Trago,11,1,Bartender
+21,Mojito,148,Trago,12,1,Bartender
+22,Gintonic,168,Trago,11,1,Bartender
+23,Black Russian,263,Trago,11,1,Bartender
+24,Martini,134,Trago,12,1,Bartender
+25,Negroni,215,Trago,11,1,Bartender
+26,Budweiser,140,Cerveza,10,2,Cervecero

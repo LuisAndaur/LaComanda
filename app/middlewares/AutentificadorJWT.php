@@ -15,6 +15,7 @@ use Slim\Psr7\Response;
             {
                 if($peticionHeader != null)
                 {
+
                     $token = trim(explode("Bearer", $peticionHeader)[1]);
                     AuthJWT::VerificarToken($token);
                     $response = $handler->handle($request);
@@ -54,6 +55,7 @@ use Slim\Psr7\Response;
             }
             catch(Exception $e)
             {
+                var_dump($e->getTraceAsString());
                 $response->getBody()->write(json_encode("Error token invalido"));
                 $response = $response->withStatus(401);
             }

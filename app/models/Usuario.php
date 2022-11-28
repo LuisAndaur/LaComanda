@@ -14,10 +14,9 @@ class Usuario
     public function crearUsuario()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO usuarios (nombre, clave, puesto, estado, idPuesto, idEstado) VALUES (:nombre, :apellido, :mail, :clave, :puesto, :estado, :idPuesto, :idEstado)");
-        $claveHash = password_hash($this->clave, PASSWORD_DEFAULT);
+        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO usuarios (nombre, clave, puesto, estado, idPuesto, idEstado) VALUES (:nombre, :clave, :puesto, :estado, :idPuesto, :idEstado)");
         $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
-        $consulta->bindValue(':clave', $claveHash);
+        $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
         $consulta->bindValue(':puesto', $this->puesto, PDO::PARAM_STR);
         $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
         $consulta->bindValue(':idPuesto', $this->idPuesto, PDO::PARAM_INT);
@@ -56,28 +55,27 @@ class Usuario
         return $consulta->fetchObject('Usuario');
     }
 
-    public function modificarUsuario($idUser)
+    public function modificarUsuario($user)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET nombre = :nombre, clave = :clave, puesto = :puesto, estado = :estado, idPuesto = :idPuesto, idEstado = :idEstado WHERE idUser = :idUser");
-        $claveHash = password_hash($this->clave, PASSWORD_DEFAULT);
-        $consulta->bindValue(':idUser', $idUser, PDO::PARAM_INT);
-        $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
-        $consulta->bindValue(':clave', $claveHash);
-        $consulta->bindValue(':puesto', $this->puesto, PDO::PARAM_STR);
-        $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
-        $consulta->bindValue(':idPuesto', $this->idPuesto, PDO::PARAM_INT);
-        $consulta->bindValue(':idEstado', $this->idEstado, PDO::PARAM_INT);
+        $consulta->bindValue(':idUser', $user->idUser, PDO::PARAM_INT);
+        $consulta->bindValue(':nombre', $user->nombre, PDO::PARAM_STR);
+        $consulta->bindValue(':clave', $user->clave, PDO::PARAM_STR);
+        $consulta->bindValue(':puesto', $user->puesto, PDO::PARAM_STR);
+        $consulta->bindValue(':estado', $user->estado, PDO::PARAM_STR);
+        $consulta->bindValue(':idPuesto', $user->idPuesto, PDO::PARAM_INT);
+        $consulta->bindValue(':idEstado', $user->idEstado, PDO::PARAM_INT);
         $consulta->execute();
     }
 
     public static function borrarUsuario($idUser)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET fechaBaja = :fechaBaja WHERE idUser = :idUser");
-        $fecha = new DateTime(date("d-m-Y"));
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET estado = :estado, fechaBaja = :fechaBaja WHERE idUser = :idUser");
         $consulta->bindValue(':idUser', $idUser, PDO::PARAM_INT);
-        $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
+        $consulta->bindValue(':estado', 'Baja', PDO::PARAM_STR);
+        $consulta->bindValue(':fechaBaja', date("Y-m-d H:i:s"));
         $consulta->execute();
     }
 

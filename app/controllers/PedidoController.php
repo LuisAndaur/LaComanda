@@ -100,11 +100,10 @@ class PedidoController extends Pedido implements IApiUsable
         $img = "La foto no existe";
       }
 
-      //Producto
       if(Pedido::ValidarProducto($datosProducto))
       {
         $pd->datosProducto = $datosProducto;
-        $t = Producto::obtenerProducto($datosProducto);
+        $t = Producto::obtenerProductoNombre($datosProducto);
         $pd->total = $t->precio * $pd->cantidad;
         $auxMesa->cuenta = $auxMesa->cuenta + $pd->total;
         Mesa::cargarCuentaMesa($idMesa,$auxMesa->cuenta);
@@ -112,7 +111,7 @@ class PedidoController extends Pedido implements IApiUsable
 
       $creacion = $pd->crearPedido();
 
-      LogController::CargarUno("pedidos",$codigo,$nombre,"Cargar datos","Datos de un pedido");
+      LogController::CargarUno("pedidos",$codigo,$nombre,"Cargar un pedido","Datos de un pedido");
 
       if($creacion > 0)
       {
@@ -197,7 +196,7 @@ class PedidoController extends Pedido implements IApiUsable
         {
           $nombre = $p->nombre;
           $pd->datosProducto = $nombre;
-          $t = Producto::obtenerProducto($nombre);
+          $t = Producto::obtenerProductoNombre($nombre);
           $pd->total = $t->precio * $pd->cantidad;
         };
 
@@ -248,7 +247,7 @@ class PedidoController extends Pedido implements IApiUsable
       $pedido = Pedido::obtenerPedido($pd);
       $payload = json_encode($pedido);
 
-      LogController::CargarUno("pedidos",$pd,0,"Obtener datos","Datos de un pedido");
+      LogController::CargarUno("pedidos",$pd->codigo,$pd->usuario,"Listar un pedido","Datos de un pedido");
 
       $response->getBody()->write($payload);
       return $response
@@ -263,6 +262,7 @@ class PedidoController extends Pedido implements IApiUsable
 
         $pedidos = Pedido::obtenerPedidoPendiente("Cervecero");
         $lista = Pedido::Listar($pedidos);
+        LogController::CargarUno("pedidos","Todos",'Cervecero',"Pendientes","Obtener pedidos pendientes");
         $payload = json_encode(array("Listado de los cerveceros"));
         $response->getBody()->write($payload);
         
@@ -270,6 +270,7 @@ class PedidoController extends Pedido implements IApiUsable
 
         $pedidos = Pedido::obtenerPedidoPendiente("Cocinero");
         $lista = Pedido::Listar($pedidos);
+        LogController::CargarUno("pedidos","Todos",'Cocinero',"Pendientes","Obtener pedidos pendientes");
         $payload = json_encode(array("Listado de los cocineros"));
         $response->getBody()->write($payload);
         
@@ -277,6 +278,7 @@ class PedidoController extends Pedido implements IApiUsable
 
         $pedidos = Pedido::obtenerPedidoPendiente("Bartender");
         $lista = Pedido::Listar($pedidos);
+        LogController::CargarUno("pedidos","Todos",'Bartender',"Pendientes","Obtener pedidos pendientes");
         $payload = json_encode(array("Listado de los bartender"));
         $response->getBody()->write($payload);
        
@@ -284,11 +286,13 @@ class PedidoController extends Pedido implements IApiUsable
 
         $pedidos = Pedido::obtenerTodos();
         $lista = Pedido::Listar($pedidos);
+        LogController::CargarUno("pedidos","Todos",'Socio',"Pendientes","Obtener pedidos pendientes");
         $payload = json_encode(array("Listado de todos los pedidos"));
         $response->getBody()->write($payload);
       }else if ($tipo == "Mozo"){
         $pedidos = Pedido::obtenerPedidoPendiente("Mozo");
         $lista = Pedido::Listar($pedidos);
+        LogController::CargarUno("pedidos","Todos",'Mozo',"Pendientes","Obtener pedidos pendientes");
         $payload = json_encode(array("Listado de pedidos pendientes"));
         $response->getBody()->write($payload);
       }else{
@@ -296,7 +300,7 @@ class PedidoController extends Pedido implements IApiUsable
         $response->getBody()->write($payload);
         
       }
-      LogController::CargarUno("pedidos",0,0,"Pendientes","Obtener pedidos pendientes");
+
       return $response
         ->withHeader('Content-Type', 'application/json');
     }
@@ -342,7 +346,7 @@ class PedidoController extends Pedido implements IApiUsable
         $response->getBody()->write($payload);
         
       }
-      LogController::CargarUno("pedidos",0,0,"En preparacion","Obtener pedidos En preparacion");
+      LogController::CargarUno("pedidos","Todos",count($lista),"En preparacion","Obtener pedidos En preparacion");
       return $response
         ->withHeader('Content-Type', 'application/json');
     }
@@ -355,14 +359,13 @@ class PedidoController extends Pedido implements IApiUsable
       {
         $pedidos = Pedido::obtenerPedidoListo();
         $lista = Pedido::Listar($pedidos);
+        LogController::CargarUno("pedidos","Todos",'Mozo',"Listos","Obtenes pedidos listos"); 
         $payload = json_encode(array("Listado de pedidos listos para servir"));
         $response->getBody()->write($payload);
-      }else{
+      }else{      
         $payload = json_encode(array("mensaje" => "No hay pedidos listos o usted no tiene los accesos correspondientes"));
         $response->getBody()->write($payload);
-        
       }
-      LogController::CargarUno("pedidos",0,0,"Listos","Obtenes pedidos listos");
       return $response
         ->withHeader('Content-Type', 'application/json');
     }
@@ -370,12 +373,11 @@ class PedidoController extends Pedido implements IApiUsable
     public function VerDemora($request, $response, $args)
     {
       $demora = array();
-      $parametros = $request->getParsedBody();
-      $codigo = $parametros['codigo'];
-      $numero = $parametros['numero'];     
-      
-      $pedido = Pedido::obtenerTiempo($codigo);
-      $mesa = Mesa::obtenerMesa($numero);
+      $codigoPedido = $args['codigoPedido'];
+      $codigoMesa = $args['codigoMesa'];    
+
+      $pedido = Pedido::obtenerTiempo($codigoPedido);
+      $mesa = Mesa::obtenerMesaNumero($codigoMesa);
       array_push($demora, $pedido, $mesa);
 
       $payload = json_encode($demora);
@@ -439,7 +441,7 @@ class PedidoController extends Pedido implements IApiUsable
         $response->getBody()->write($payload);
         
       }
-      LogController::CargarUno("pedidos",0,0,"Traer por puesto","Datos de un pedido");
+      LogController::CargarUno("pedidos",$pedidos->codigo,$pedidos->usuario,"Traer por puesto","Datos de un pedido");
       return $response
         ->withHeader('Content-Type', 'application/json');
     }
@@ -449,7 +451,7 @@ class PedidoController extends Pedido implements IApiUsable
       $lista = Pedido::obtenerTodos();
       $payload = json_encode(array("listaPedido" => $lista));
 
-      LogController::CargarUno("pedidos",0,0,"Obtener datos","Datos de todos los pedidos");
+      LogController::CargarUno("pedidos","Todos",count($lista),"Listar los pedidos","Datos de todos los pedidos");
 
       $response->getBody()->write($payload);
       return $response
@@ -514,7 +516,7 @@ class PedidoController extends Pedido implements IApiUsable
               {
                 $aviso = "Entregado a tiempo";
               }
-              LogController::CargarUno("pedidos",$codigo,$estado,"Actualizar datos", "($aviso)");
+              LogController::CargarUno("pedidos",$codigo,$estado,"Actualizar datos", $aviso);
             }
             else
             {

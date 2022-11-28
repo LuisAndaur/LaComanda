@@ -71,7 +71,30 @@ class Mesa{
         return $consulta->execute(); 
     }
 
-    public function modificarMesa($id)
+    public static function MesaCerrada($numero, $estadoMesa, $id, $cuenta)
+    {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estadoMesa = :estadoMesa, cuenta = :cuenta WHERE numero = :numero AND id = :id");
+        $consulta->bindValue(':numero', $numero, PDO::PARAM_STR);
+        $consulta->bindValue(':estadoMesa',$estadoMesa, PDO::PARAM_STR);
+        $consulta->bindValue(':id',$id, PDO::PARAM_INT);
+        $consulta->bindValue(':cuenta',$cuenta, PDO::PARAM_INT);
+        
+        return $consulta->execute(); 
+    }
+
+    public function modificarMesa($mesa)
+    {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estadoMesa = :estadoMesa, nombre = :nombre WHERE id = :id");
+        $consulta->bindValue(':id', $mesa->id, PDO::PARAM_INT);
+        $consulta->bindValue(':estadoMesa', $mesa->estadoMesa, PDO::PARAM_STR);
+        $consulta->bindValue(':nombre', $mesa->nombre, PDO::PARAM_STR);
+        //$consulta->bindValue(':cuenta', $$mesa->cuenta, PDO::PARAM_INT);
+        $consulta->execute();
+    }
+
+    public function modificarMesaAccion($id)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estadoMesa = :estadoMesa, nombre = :nombre, cuenta = :cuenta WHERE id = :id");
